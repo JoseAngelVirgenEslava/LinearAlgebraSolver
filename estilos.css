@@ -61,6 +61,7 @@ body {
 .parrafo-final {
     background-color: black;
     color: white;
+    padding: 0.7rem;
 }
 
 /* Oculta todos los divs de funcionalidad inicialmente */
