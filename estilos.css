@@ -10,15 +10,16 @@ body {
 .contenedor-principal {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    min-height: 100vh; /* Asegura que ocupe toda la pantalla */
 }
 
 .principal {
-    flex: 1;
+    flex: 1; /* Hace que ocupe todo el espacio disponible */
     display: flex;
     flex-direction: column;
     align-items: center;
     margin-top: 1%;
+    overflow-y: auto; /* Permite desplazamiento si el contenido es muy alto */
 }
 
 .boton1, .boton2, .boton3 {
@@ -30,9 +31,21 @@ body {
     margin: 5px;
 }
 
-.boton1:hover, .boton2:hover, .boton3:hover {
+.boton1:hover {
     transition: 0.5s;
     background-color: navy;
+    color: white;
+}
+
+.boton2:hover {
+    transition: 0.5s;
+    background-color: crimson;
+    color: white;
+}
+
+.boton3:hover {
+    transition: 0.5s;
+    background-color: darkgreen;
     color: white;
 }
 
@@ -41,7 +54,7 @@ body {
     height: 50px;
     background-color: black;
     text-align: center;
-    position: fixed;
+    position: fixed; /* Permanece en la parte inferior de la ventana */
     bottom: 0;
 }
 
@@ -58,4 +71,19 @@ body {
     border-radius: 10px;
     text-align: center;
     margin-top: 10px;
+}
+
+/* Estilo para los resultados */
+#resultado-ecuaciones,
+#resultado-multiplicacion,
+#resultado-suma {
+    margin-top: 15px;
+    font-size: 16px;
+    color: darkgreen;
+    font-weight: bold;
+}
+
+/* Agrega un margen al final del contenido para evitar que se solape con el footer */
+.principal {
+    margin-bottom: 60px; /* Asegura espacio entre el contenido y el footer */
 }

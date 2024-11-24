@@ -69,12 +69,12 @@ function resolverSistema() {
 
     // Resolver sistema usando eliminación de Gauss
     const solucion = gauss(matriz, vectorResultado);
+    const contenedorResultado = document.getElementById('resultado-ecuaciones');
     if (!solucion) {
-        alert('El sistema no tiene solución o es indeterminado.');
+        contenedorResultado.innerHTML = `<p class="text-danger">El sistema no tiene solución o es indeterminado.</p>`;
         return;
     }
-
-    alert('Solución: ' + solucion.join(', '));
+    contenedorResultado.innerHTML = `<p>Solución: ${solucion.join(', ')}</p>`;
 }
 
 // Algoritmo de eliminación de Gauss
@@ -156,13 +156,12 @@ function multiplicarMatrices() {
     const matriz1 = getMatriz('matriz1');
     const matriz2 = getMatriz('matriz2');
     const resultado = multiplicar(matriz1, matriz2);
-
+    const contenedorResultado = document.getElementById('resultado-multiplicacion');
     if (!resultado) {
-        alert('Dimensiones incompatibles.');
+        contenedorResultado.innerHTML = `<p class="text-danger">Dimensiones incompatibles.</p>`;
         return;
     }
-
-    mostrarResultado('resultado-multiplicacion', resultado);
+    contenedorResultado.innerHTML = mostrarResultado(resultado);
 }
 
 // Multiplicación de matrices
@@ -199,8 +198,8 @@ function sumarMatrices() {
         return;
     }
 
-    const resultado = matriz1.map((fila, i) => fila.map((val, j) => val + matriz2[i][j]));
-    mostrarResultado('resultado-suma', resultado);
+    const contenedorResultado = document.getElementById('resultado-suma');
+    contenedorResultado.innerHTML = mostrarResultado(resultado);
 }
 
 // Helpers
