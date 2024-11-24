@@ -85,44 +85,94 @@ function crearMatrizEcuaciones() {
 // Función para resolver el sistema de ecuaciones
 function resolverSistema() {
     const dimension = parseInt(document.getElementById("dimension-ecuaciones").value);
-    const matrizEcuaciones = document.getElementsByClassName("input-coeficiente");
-    const vectorSolucion = document.getElementsByClassName("input-solucion");
+    const matrizInputs = document.getElementsByClassName("input-coeficiente");
+    const vectorSolucionInputs = document.getElementsByClassName("input-solucion");
     const resultadoEcuaciones = document.getElementById("resultado-ecuaciones");
 
-    // Obtener datos de las matrices
-    let sistema = [];
+    // Obtener datos de la matriz de coeficientes y el vector solución
+    let matrizAumentada = [];
     for (let i = 0; i < dimension; i++) {
         let fila = [];
         for (let j = 0; j < dimension; j++) {
-            fila.push(parseFloat(matrizEcuaciones[i * dimension + j].value) || 0);
+            fila.push(parseFloat(matrizInputs[i * dimension + j].value) || 0);
         }
-        sistema.push(fila);
+        fila.push(parseFloat(vectorSolucionInputs[i].value) || 0); // Agregar el término independiente
+        matrizAumentada.push(fila);
     }
 
-    let solucion = [];
+    // Resolver el sistema usando eliminación Gaussiana
+    let soluciones = gaussElimination(matrizAumentada, dimension);
+
+    // Mostrar los resultados en el formato requerido
+    if (soluciones) {
+        resultadoEcuaciones.innerHTML = ""; // Limpiar resultados anteriores
+        const contenedorResultado = document.createElement("div");
+        contenedorResultado.classList.add("sistema-contenedor");
+
+        const llaveIzquierda = document.createElement("div");
+        llaveIzquierda.textContent = "{";
+        llaveIzquierda.classList.add("sistema-parentesis");
+
+        const listaResultados = document.createElement("div");
+        listaResultados.innerHTML = soluciones
+            .map((valor, index) => `x${index + 1} = ${valor.toFixed(2)}`)
+            .join("<br>");
+
+        contenedorResultado.appendChild(llaveIzquierda);
+        contenedorResultado.appendChild(listaResultados);
+        resultadoEcuaciones.appendChild(contenedorResultado);
+    } else {
+        resultadoEcuaciones.innerHTML =
+            "<p style='color: red;'>El sistema no tiene solución única.</p>";
+    }
+}
+
+function gaussElimination(matriz, dimension) {
+    // Aplicar eliminación Gaussiana
     for (let i = 0; i < dimension; i++) {
-        solucion.push(parseFloat(vectorSolucion[i].value) || 0);
+        // Buscar el pivote
+        let maxFila = i;
+        for (let k = i + 1; k < dimension; k++) {
+            if (Math.abs(matriz[k][i]) > Math.abs(matriz[maxFila][i])) {
+                maxFila = k;
+            }
+        }
+
+        // Intercambiar filas
+        let temp = matriz[i];
+        matriz[i] = matriz[maxFila];
+        matriz[maxFila] = temp;
+
+        // Verificar si el pivote es 0
+        if (Math.abs(matriz[i][i]) < 1e-10) {
+            return null; // Sistema sin solución única
+        }
+
+        // Normalizar la fila del pivote
+        for (let j = i + 1; j <= dimension; j++) {
+            matriz[i][j] /= matriz[i][i];
+        }
+        matriz[i][i] = 1;
+
+        // Reducir filas inferiores
+        for (let k = i + 1; k < dimension; k++) {
+            let factor = matriz[k][i];
+            for (let j = i; j <= dimension; j++) {
+                matriz[k][j] -= factor * matriz[i][j];
+            }
+        }
     }
 
-    // Resolver el sistema (aquí puedes implementar una lógica de resolución como eliminación gaussiana)
-    // Por simplicidad, asumimos que el sistema tiene solución
-    let resultado = sistema.map((fila, index) => `x${index + 1} = ${solucion[index]}`);
+    // Sustitución hacia atrás
+    let soluciones = new Array(dimension);
+    for (let i = dimension - 1; i >= 0; i--) {
+        soluciones[i] = matriz[i][dimension];
+        for (let j = i + 1; j < dimension; j++) {
+            soluciones[i] -= matriz[i][j] * soluciones[j];
+        }
+    }
 
-    // Mostrar resultados
-    resultadoEcuaciones.innerHTML = "";
-    const contenedorResultado = document.createElement("div");
-    contenedorResultado.classList.add("sistema-contenedor");
-
-    const llaveIzquierda = document.createElement("div");
-    llaveIzquierda.textContent = "{";
-    llaveIzquierda.classList.add("sistema-parentesis");
-
-    const listaResultados = document.createElement("div");
-    listaResultados.innerHTML = resultado.join("<br>");
-
-    contenedorResultado.appendChild(llaveIzquierda);
-    contenedorResultado.appendChild(listaResultados);
-    resultadoEcuaciones.appendChild(contenedorResultado);
+    return soluciones;
 }
 
 // Algoritmo de eliminación de Gauss
