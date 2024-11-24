@@ -88,3 +88,29 @@ body {
 .principal {
     margin-bottom: 60px; /* Asegura espacio entre el contenido y el footer */
 }
+
+.sistema-muestra {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.sistema-parentesis {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.resultado-sistema {
+    margin-top: 20px;
+    font-size: 16px;
+    color: darkgreen;
+    text-align: left;
+}
+
+.resultado-sistema .sistema-contenedor {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
