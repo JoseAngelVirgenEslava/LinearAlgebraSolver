@@ -32,6 +32,7 @@
                     <div id="matriz-ecuaciones" class="sistema-muestra"></div>
                     <button onclick="resolverSistema()" class="resolver">Resolver</button>
                     <div id="resultado-ecuaciones" class="resultado-sistema"></div>
+                    <button onclick="limpiarSistemaEcuaciones()" class="resolver">Limpiar</button> 
                 </div>
     
                 <!-- Multiplicación de matrices -->
@@ -47,9 +48,10 @@
                         <input type="number" id="filas-matriz2" placeholder="Filas" min="1" style="text-align: center;">
                         <input type="number" id="columnas-matriz2" placeholder="Columnas" min="1" style="text-align: center;">
                     </div>
-                    <button class="boton-generar" onclick="validarYCrearMatrices()">Generar Matrices</button>
+                    <button class="boton-generar" onclick="validarYCrearMatrices()" style="margin-bottom: 1rem;">Generar Matrices</button>
                     <div id="matrices-multiplicacion"></div>
-                    <button class="boton-multiplicar" id="boton-multiplicar">Multiplicar</button>
+                    <button class="boton-multiplicar" id="boton-multiplicar" style="margin-bottom: 1rem;">Multiplicar</button>
+                    <button onclick="limpiarMultiplicacionMatrices()" class="resolver">Limpiar</button> 
                 </div>
     
                 <!-- Suma de matrices -->
@@ -61,6 +63,7 @@
                     <div id="matrices-suma" class="mt-3"></div>
                     <button class="boton-multiplicar" id="sumar">Sumar</button>
                     <div id="resultado-suma"></div>
+                    <button onclick="limpiarSumaMatrices()" class="resolver">Limpiar</button> 
                 </div>
             </div>
         </div>

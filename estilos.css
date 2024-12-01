@@ -302,3 +302,7 @@ input[type="number"] {
     box-shadow: none;
     font-family: 'Bokor', system-ui;
 }
+
+.matricesSuma > button {
+    width: 100%;
+}

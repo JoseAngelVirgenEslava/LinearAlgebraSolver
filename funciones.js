@@ -121,6 +121,11 @@ function resolverSistema() {
         contenedorResultado.appendChild(llaveIzquierda);
         contenedorResultado.appendChild(listaResultados);
         resultadoEcuaciones.appendChild(contenedorResultado);
+
+        // Guardar en localStorage
+        const operaciones = JSON.parse(localStorage.getItem("sistemaEcuaciones")) || [];
+        operaciones.push({ dimension, matrizAumentada, soluciones });
+        localStorage.setItem("sistemaEcuaciones", JSON.stringify(operaciones));
     } else {
         resultadoEcuaciones.innerHTML =
             "<p style='color: red;'>El sistema no tiene solución única.</p>";
@@ -341,40 +346,210 @@ function crearInputsMatriz(filas, columnas, id) {
 
 // Función para multiplicar matrices
 function multiplicarMatrices(filas1, columnas1, columnas2, matrizResultado, operadorIgual, parenIzqRes, parenDerRes) {
-    // Verificar que matrizResultado exista
-    if (!matrizResultado) {
-        console.error("El contenedor de la matriz de resultado no está definido.");
-        return;
-    }
-
     const matriz1Inputs = document.querySelectorAll('#matriz1 input');
     const matriz2Inputs = document.querySelectorAll('#matriz2 input');
     const resultadoInputs = matrizResultado.querySelectorAll('input');
 
-    if (!matriz1Inputs.length || !matriz2Inputs.length || !resultadoInputs.length) {
-        console.error("No se encontraron inputs en las matrices.");
-        return;
-    }
+    const matriz1 = [...matriz1Inputs].map(input => parseFloat(input.value) || 0);
+    const matriz2 = [...matriz2Inputs].map(input => parseFloat(input.value) || 0);
 
-    // Multiplicación de matrices
+    // Multiplicar las matrices
+    let resultados = []; // Almacenar los valores calculados
     for (let i = 0; i < filas1; i++) {
         for (let j = 0; j < columnas2; j++) {
             let suma = 0;
             for (let k = 0; k < columnas1; k++) {
-                const valor1 = parseFloat(matriz1Inputs[i * columnas1 + k].value) || 0;
-                const valor2 = parseFloat(matriz2Inputs[k * columnas2 + j].value) || 0;
+                const valor1 = matriz1[i * columnas1 + k];
+                const valor2 = matriz2[k * columnas2 + j];
                 suma += valor1 * valor2;
             }
             resultadoInputs[i * columnas2 + j].value = suma;
+            resultados.push(suma); // Agregar a los resultados
         }
     }
 
-    // Mostrar resultado y símbolos
+    // Guardar en localStorage
+    const operaciones = JSON.parse(localStorage.getItem("multiplicacionMatrices")) || [];
+    operaciones.push({ filas1, columnas1, columnas2, matriz1, matriz2, resultados });
+    localStorage.setItem("multiplicacionMatrices", JSON.stringify(operaciones));
+
+    // Mostrar el resultado
     operadorIgual.style.display = 'block';
     matrizResultado.style.display = 'flex';
     parenIzqRes.style.display = 'block';
     parenDerRes.style.display = 'block';
 }
+
+function cargarDatosGuardados() {
+    // Sistema de ecuaciones
+    const sistemas = JSON.parse(localStorage.getItem("sistemaEcuaciones")) || [];
+    if (sistemas.length > 0) {
+        const ultimoSistema = sistemas[sistemas.length - 1];
+        const matrizEcuaciones = document.getElementById("matriz-ecuaciones");
+        const resultadoEcuaciones = document.getElementById("resultado-ecuaciones");
+
+        // Limpiar contenido anterior
+        matrizEcuaciones.innerHTML = "";
+        resultadoEcuaciones.innerHTML = "";
+
+        // Reconstruir la matriz aumentada
+        const parenIzquierdo = document.createElement("div");
+        parenIzquierdo.textContent = "(";
+        parenIzquierdo.classList.add("sistema-parentesis");
+
+        const coeficientes = document.createElement("div");
+        coeficientes.classList.add("sistema-coeficientes");
+        for (let i = 0; i < ultimoSistema.dimension; i++) {
+            for (let j = 0; j < ultimoSistema.dimension; j++) {
+                const input = document.createElement("input");
+                input.type = "number";
+                input.value = ultimoSistema.matrizAumentada[i][j];
+                input.classList.add("input-coeficiente");
+                input.disabled = true; // Solo lectura
+                coeficientes.appendChild(input);
+            }
+            coeficientes.appendChild(document.createElement("br"));
+        }
+
+        const parenDerecho = document.createElement("div");
+        parenDerecho.textContent = ")";
+        parenDerecho.classList.add("sistema-parentesis");
+
+        // Vector de variables (x1, x2, ..., xn)
+        const vectorVariables = document.createElement("div");
+        vectorVariables.classList.add("sistema-coeficientes");
+        for (let i = 0; i < ultimoSistema.dimension; i++) {
+            const varInput = document.createElement("input");
+            varInput.type = "text";
+            varInput.value = `x${i + 1}`;
+            varInput.readOnly = true;
+            vectorVariables.appendChild(varInput);
+            vectorVariables.appendChild(document.createElement("br"));
+        }
+
+        // Vector solución
+        const vectorSolucion = document.createElement("div");
+        vectorSolucion.classList.add("sistema-coeficientes");
+        for (let i = 0; i < ultimoSistema.dimension; i++) {
+            const input = document.createElement("input");
+            input.type = "number";
+            input.value = ultimoSistema.matrizAumentada[i][ultimoSistema.dimension];
+            input.classList.add("input-solucion");
+            input.disabled = true; // Solo lectura
+            vectorSolucion.appendChild(input);
+            vectorSolucion.appendChild(document.createElement("br"));
+        }
+
+        const igual = document.createElement("div");
+        igual.textContent = "=";
+        igual.style.margin = "0 10px";
+
+        // Agregar al contenedor de ecuaciones
+        matrizEcuaciones.appendChild(parenIzquierdo);
+        matrizEcuaciones.appendChild(coeficientes);
+        matrizEcuaciones.appendChild(parenDerecho);
+        matrizEcuaciones.appendChild(vectorVariables);
+        matrizEcuaciones.appendChild(igual);
+        matrizEcuaciones.appendChild(vectorSolucion);
+
+        // Mostrar resultado
+        const contenedorResultado = document.createElement("div");
+        contenedorResultado.classList.add("sistema-contenedor");
+
+        const llaveIzquierda = document.createElement("div");
+        llaveIzquierda.textContent = "{";
+        llaveIzquierda.classList.add("sistema-parentesis");
+
+        const listaResultados = document.createElement("div");
+        listaResultados.innerHTML = ultimoSistema.soluciones
+            .map((valor, index) => `x${index + 1} = ${valor.toFixed(2)}`)
+            .join("<br>");
+        listaResultados.classList.add("resultado-sistema");
+
+        contenedorResultado.appendChild(llaveIzquierda);
+        contenedorResultado.appendChild(listaResultados);
+        resultadoEcuaciones.appendChild(contenedorResultado);
+    }
+
+    // Multiplicación de matrices
+    const multiplicaciones = JSON.parse(localStorage.getItem("multiplicacionMatrices")) || [];
+    if (multiplicaciones.length > 0) {
+        const ultimaMultiplicacion = multiplicaciones[multiplicaciones.length - 1];
+        const contenedorMultiplicacion = document.getElementById("matrices-multiplicacion");
+        contenedorMultiplicacion.innerHTML = "";
+
+        const filaMatrices = document.createElement("div");
+        filaMatrices.style.display = "flex";
+        filaMatrices.style.alignItems = "center";
+
+        // Matriz 1 con paréntesis
+        filaMatrices.appendChild(crearParentesis("("));
+        reconstruirMatriz(ultimaMultiplicacion.matriz1, ultimaMultiplicacion.filas1, ultimaMultiplicacion.columnas1, filaMatrices, true);
+        filaMatrices.appendChild(crearParentesis(")"));
+
+        // Operador de multiplicación
+        const operadorMultiplicacion = document.createElement("span");
+        operadorMultiplicacion.textContent = "×";
+        operadorMultiplicacion.style.fontSize = "24px";
+        operadorMultiplicacion.style.margin = "0 10px";
+        filaMatrices.appendChild(operadorMultiplicacion);
+
+        // Matriz 2 con paréntesis
+        filaMatrices.appendChild(crearParentesis("("));
+        reconstruirMatriz(ultimaMultiplicacion.matriz2, ultimaMultiplicacion.filas2, ultimaMultiplicacion.columnas2, filaMatrices, true); // Asegura la referencia a matriz2
+        filaMatrices.appendChild(crearParentesis(")"));
+
+        // Operador de igualdad
+        const operadorIgual = document.createElement("span");
+        operadorIgual.textContent = "=";
+        operadorIgual.style.fontSize = "24px";
+        operadorIgual.style.margin = "0 10px";
+        filaMatrices.appendChild(operadorIgual);
+
+        // Matriz resultado con paréntesis
+        filaMatrices.appendChild(crearParentesis("("));
+        reconstruirMatriz(ultimaMultiplicacion.resultados, ultimaMultiplicacion.filas1, ultimaMultiplicacion.columnas2, filaMatrices, true);
+        filaMatrices.appendChild(crearParentesis(")"));
+
+        contenedorMultiplicacion.appendChild(filaMatrices);
+    }
+}
+
+// Función auxiliar para crear paréntesis
+function crearParentesis(texto) {
+    const paren = document.createElement("span");
+    paren.textContent = texto;
+    paren.style.fontSize = "24px";
+    return paren;
+}
+
+// Función auxiliar para reconstruir matrices con clases y estilos
+function reconstruirMatriz(matriz, filas, columnas, contenedor, readonly = false) {
+    const matrizDiv = document.createElement("div");
+    matrizDiv.style.display = "flex";
+    matrizDiv.style.flexDirection = "column";
+
+    for (let i = 0; i < filas; i++) {
+        const filaDiv = document.createElement("div");
+        filaDiv.style.display = "flex";
+
+        for (let j = 0; j < columnas; j++) {
+            const input = document.createElement("input");
+            input.type = "number";
+            input.value = matriz[i * columnas + j];
+            input.classList.add("input-dinamico");
+            if (readonly) input.disabled = true; // Solo lectura si es resultado
+            filaDiv.appendChild(input);
+        }
+
+        matrizDiv.appendChild(filaDiv);
+    }
+
+    contenedor.appendChild(matrizDiv);
+}
+
+// Llamar a la función al cargar la página
+window.onload = cargarDatosGuardados;
 
 // Multiplicación de matrices
 function multiplicar(matriz1, matriz2) {
@@ -406,11 +581,22 @@ function sumarMatrices(dimension, matrizResultado, operadorIgual, parenIzqRes, p
     const matriz2Inputs = document.querySelectorAll('#matriz2-suma input');
     const resultadoInputs = matrizResultado.querySelectorAll('#resultado-suma input');
 
+    const matriz1 = [...matriz1Inputs].map(input => parseFloat(input.value) || 0);
+    const matriz2 = [...matriz2Inputs].map(input => parseFloat(input.value) || 0);
+    const resultados = [];
+
     for (let i = 0; i < dimension * dimension; i++) {
-        resultadoInputs[i].value = parseFloat(matriz1Inputs[i].value) + parseFloat(matriz2Inputs[i].value);
+        const suma = parseFloat(matriz1Inputs[i].value) + parseFloat(matriz2Inputs[i].value);
+        resultadoInputs[i].value = suma;
+        resultados.push(suma);
     }
 
-    // Mostrar resultado y símbolos
+    // Guardar en localStorage
+    const operaciones = JSON.parse(localStorage.getItem("sumaMatrices")) || [];
+    operaciones.push({ dimension, matriz1, matriz2, resultados });
+    localStorage.setItem("sumaMatrices", JSON.stringify(operaciones));
+
+    // Mostrar el resultado
     operadorIgual.style.display = 'block';
     matrizResultado.style.display = 'flex';
     parenIzqRes.style.display = 'block';
@@ -512,8 +698,6 @@ function crearMatricesSuma() {
     parenIzq2.style.fontSize = '24px';
 
     const matriz2 = crearMatriz('matriz2-suma', filas, columnas);
-
-
     const parenDer2 = document.createElement('span');
     parenDer2.textContent = ')';
     parenDer2.style.fontSize = '24px';
@@ -539,7 +723,7 @@ function crearMatricesSuma() {
     parenDerRes.style.fontSize = '24px';
     parenDerRes.style.display = 'none';
 
-    // Botón para sumar matrices
+    // Crear y configurar el botón de sumar dinámicamente
     const botonSumar = document.getElementById('sumar')
     botonSumar.onclick = function () {
         sumarMatrices(dimension, matrizResultado, operadorIgual, parenIzqRes, parenDerRes);
@@ -560,7 +744,6 @@ function crearMatricesSuma() {
 
     // Agregar fila de matrices y botón al contenedor principal
     contenedorPrincipal.appendChild(filaMatrices);
-    contenedorPrincipal.appendChild(botonSumar);
 
     // Agregar contenedor principal al contenedor de la funcionalidad
     contenedor.appendChild(contenedorPrincipal);
@@ -591,4 +774,27 @@ function crearMatriz(id, filas, columnas, disabled = false) {
 
 function ajustarTamañoInput(input) {
     input.style.width = Math.max(input.value.length * 10 + 10, 50) + 'px';
+}
+
+// Limpia los datos y el contenido generado en el sistema de ecuaciones
+function limpiarSistemaEcuaciones() {
+    document.getElementById('dimension-ecuaciones').value = '';
+    document.getElementById('matriz-ecuaciones').innerHTML = '';
+    document.getElementById('resultado-ecuaciones').innerHTML = '';
+}
+
+// Limpia los datos y el contenido generado en la multiplicación de matrices
+function limpiarMultiplicacionMatrices() {
+    document.getElementById('filas-matriz1').value = '';
+    document.getElementById('columnas-matriz1').value = '';
+    document.getElementById('filas-matriz2').value = '';
+    document.getElementById('columnas-matriz2').value = '';
+    document.getElementById('matrices-multiplicacion').innerHTML = '';
+}
+
+// Limpia los datos y el contenido generado en la suma de matrices
+function limpiarSumaMatrices() {
+    document.getElementById('dimension-suma').value = '';
+    document.getElementById('matrices-suma').innerHTML = '';
+    document.getElementById('resultado-suma').innerHTML = '';
 }
