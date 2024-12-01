@@ -6,7 +6,7 @@ function mostrarSeccion(id) {
     document.querySelectorAll('.funcionalidad > div').forEach(div => {
         div.style.display = 'none';
     });
-    document.getElementById(id).style.display = 'block';
+    document.getElementById(id).style.display = 'flex';
 }
 
 // Función para crear matriz en sistema de ecuaciones
@@ -216,6 +216,96 @@ function gauss(matriz, vector) {
     return x;
 }
 
+function crearMatricesMultiplicacion() {
+    const filas1 = parseInt(document.getElementById('filas-matriz1').value);
+    const columnas1 = parseInt(document.getElementById('columnas-matriz1').value);
+    const filas2 = parseInt(document.getElementById('filas-matriz2').value);
+    const columnas2 = parseInt(document.getElementById('columnas-matriz2').value);
+
+    const contenedor = document.getElementById('matrices-multiplicacion');
+
+    if (!filas1 || !columnas1 || !filas2 || !columnas2 || columnas1 !== filas2) {
+        alert("El número de columnas de la Matriz 1 debe coincidir con el número de filas de la Matriz 2.");
+        return;
+    }
+
+    contenedor.innerHTML = ''; // Limpiar contenido previo
+
+    const filaMatrices = document.createElement('div');
+    filaMatrices.style.display = 'flex';
+    filaMatrices.style.alignItems = 'center';
+
+    // Matriz 1 con paréntesis
+    const parenIzq1 = document.createElement('span');
+    parenIzq1.textContent = '(';
+    parenIzq1.style.fontSize = '24px';
+
+    const matriz1 = crearMatriz('matriz1', filas1, columnas1);
+
+    const parenDer1 = document.createElement('span');
+    parenDer1.textContent = ')';
+    parenDer1.style.fontSize = '24px';
+
+    // Operador de multiplicación
+    const operadorMultiplicacion = document.createElement('span');
+    operadorMultiplicacion.textContent = '×';
+    operadorMultiplicacion.style.fontSize = '24px';
+    operadorMultiplicacion.style.margin = '0 10px';
+
+    // Matriz 2 con paréntesis
+    const parenIzq2 = document.createElement('span');
+    parenIzq2.textContent = '(';
+    parenIzq2.style.fontSize = '24px';
+
+    const matriz2 = crearMatriz('matriz2', filas2, columnas2);
+
+    const parenDer2 = document.createElement('span');
+    parenDer2.textContent = ')';
+    parenDer2.style.fontSize = '24px';
+
+    // Operador de igualdad (se mostrará después)
+    const operadorIgual = document.createElement('span');
+    operadorIgual.textContent = '=';
+    operadorIgual.style.fontSize = '24px';
+    operadorIgual.style.margin = '0 10px';
+    operadorIgual.style.display = 'none'; // Ocultar inicialmente
+
+    // Matriz resultado con paréntesis (se mostrará después)
+    const parenIzqRes = document.createElement('span');
+    parenIzqRes.textContent = '(';
+    parenIzqRes.style.fontSize = '24px';
+    parenIzqRes.style.display = 'none';
+
+    const matrizResultado = crearMatriz('resultado-multiplicacion', filas1, columnas2);
+    matrizResultado.style.display = 'none';
+    const parenDerRes = document.createElement('span');
+    parenDerRes.textContent = ')';
+    parenDerRes.style.fontSize = '24px';
+    parenDerRes.style.display = 'none';
+
+    const boton_mult = document.getElementById('boton-multiplicar')
+    boton_mult.onclick = function () {
+        multiplicarMatrices(filas1, columnas1, columnas2, matrizResultado, operadorIgual, parenIzqRes, parenDerRes);
+    };
+
+    // Agregar elementos al contenedor de la fila
+    filaMatrices.appendChild(parenIzq1);
+    filaMatrices.appendChild(matriz1);
+    filaMatrices.appendChild(parenDer1);
+    filaMatrices.appendChild(operadorMultiplicacion);
+    filaMatrices.appendChild(parenIzq2);
+    filaMatrices.appendChild(matriz2);
+    filaMatrices.appendChild(parenDer2);
+    filaMatrices.appendChild(operadorIgual);
+    filaMatrices.appendChild(parenIzqRes);
+    filaMatrices.appendChild(matrizResultado);
+    filaMatrices.appendChild(parenDerRes);
+
+    // Agregar fila de matrices y botón al contenedor principal
+    contenedor.appendChild(filaMatrices);
+    //contenedor.appendChild(botonMultiplicar);
+}
+
 // Funciones para validar y crear matrices de multiplicación
 function validarYCrearMatrices() {
     const filas1 = parseInt(document.getElementById('filas-matriz1').value);
@@ -228,13 +318,13 @@ function validarYCrearMatrices() {
         return;
     }
 
-    crearInputsMatriz(filas1, columnas1, 'matriz1');
-    crearInputsMatriz(filas2, columnas2, 'matriz2');
+    crearInputsMatriz(filas1, columnas1, '#matriz1');
+    crearInputsMatriz(filas2, columnas2, '#matriz2');
+    crearMatricesMultiplicacion();
 }
 
 function crearInputsMatriz(filas, columnas, id) {
     const contenedor = document.getElementById('matrices-multiplicacion');
-    contenedor.innerHTML += `<h4>${id}</h4>`;
     for (let i = 0; i < filas; i++) {
         for (let j = 0; j < columnas; j++) {
             const input = document.createElement('input');
@@ -250,16 +340,40 @@ function crearInputsMatriz(filas, columnas, id) {
 }
 
 // Función para multiplicar matrices
-function multiplicarMatrices() {
-    const matriz1 = getMatriz('matriz1');
-    const matriz2 = getMatriz('matriz2');
-    const resultado = multiplicar(matriz1, matriz2);
-    const contenedorResultado = document.getElementById('resultado-multiplicacion');
-    if (!resultado) {
-        contenedorResultado.innerHTML = `<p class="text-danger">Dimensiones incompatibles.</p>`;
+function multiplicarMatrices(filas1, columnas1, columnas2, matrizResultado, operadorIgual, parenIzqRes, parenDerRes) {
+    // Verificar que matrizResultado exista
+    if (!matrizResultado) {
+        console.error("El contenedor de la matriz de resultado no está definido.");
         return;
     }
-    contenedorResultado.innerHTML = mostrarResultado(resultado);
+
+    const matriz1Inputs = document.querySelectorAll('#matriz1 input');
+    const matriz2Inputs = document.querySelectorAll('#matriz2 input');
+    const resultadoInputs = matrizResultado.querySelectorAll('input');
+
+    if (!matriz1Inputs.length || !matriz2Inputs.length || !resultadoInputs.length) {
+        console.error("No se encontraron inputs en las matrices.");
+        return;
+    }
+
+    // Multiplicación de matrices
+    for (let i = 0; i < filas1; i++) {
+        for (let j = 0; j < columnas2; j++) {
+            let suma = 0;
+            for (let k = 0; k < columnas1; k++) {
+                const valor1 = parseFloat(matriz1Inputs[i * columnas1 + k].value) || 0;
+                const valor2 = parseFloat(matriz2Inputs[k * columnas2 + j].value) || 0;
+                suma += valor1 * valor2;
+            }
+            resultadoInputs[i * columnas2 + j].value = suma;
+        }
+    }
+
+    // Mostrar resultado y símbolos
+    operadorIgual.style.display = 'block';
+    matrizResultado.style.display = 'flex';
+    parenIzqRes.style.display = 'block';
+    parenDerRes.style.display = 'block';
 }
 
 // Multiplicación de matrices
@@ -287,33 +401,39 @@ function multiplicar(matriz1, matriz2) {
 }
 
 // Función para sumar matrices
-function sumarMatrices() {
-    const matriz1 = getMatriz('suma1');
-    const matriz2 = getMatriz('suma2');
+function sumarMatrices(dimension, matrizResultado, operadorIgual, parenIzqRes, parenDerRes) {
+    const matriz1Inputs = document.querySelectorAll('#matriz1-suma input');
+    const matriz2Inputs = document.querySelectorAll('#matriz2-suma input');
+    const resultadoInputs = matrizResultado.querySelectorAll('#resultado-suma input');
 
-    if (!matriz1 || !matriz2 || matriz1.length !== matriz2.length || matriz1[0].length !== matriz2[0].length) {
-        alert('Las dimensiones no coinciden.');
-        return;
+    for (let i = 0; i < dimension * dimension; i++) {
+        resultadoInputs[i].value = parseFloat(matriz1Inputs[i].value) + parseFloat(matriz2Inputs[i].value);
     }
 
-    const contenedorResultado = document.getElementById('resultado-suma');
-    contenedorResultado.innerHTML = mostrarResultado(resultado);
+    // Mostrar resultado y símbolos
+    operadorIgual.style.display = 'block';
+    matrizResultado.style.display = 'flex';
+    parenIzqRes.style.display = 'block';
+    parenDerRes.style.display = 'block';
 }
 
 // Helpers
 function getMatriz(clase) {
     const inputs = document.querySelectorAll(`.${clase}`);
+    if (inputs.length === 0) {
+        console.error(`No se encontraron entradas para la clase ${clase}`);
+        return null;
+    }
+    
     const rows = Math.max(...[...inputs].map(input => parseInt(input.dataset.row))) + 1;
     const cols = Math.max(...[...inputs].map(input => parseInt(input.dataset.col))) + 1;
 
-    const matriz = Array(rows)
-        .fill(0)
-        .map(() => Array(cols).fill(0));
+    const matriz = Array.from({ length: rows }, () => Array(cols).fill(0));
 
     inputs.forEach(input => {
         const row = parseInt(input.dataset.row);
         const col = parseInt(input.dataset.col);
-        matriz[row][col] = parseFloat(input.value || 0);
+        matriz[row][col] = parseFloat(input.value) || 0;
     });
 
     return matriz;
@@ -321,9 +441,154 @@ function getMatriz(clase) {
 
 function mostrarResultado(id, resultado) {
     const contenedor = document.getElementById(id);
-    contenedor.innerHTML = '';
+    if (!contenedor) {
+        console.error(`El contenedor con ID '${id}' no existe.`);
+        return;
+    }
+
+    contenedor.innerHTML = ''; // Limpiar el contenedor
+    //contenedor.classList.add('matrices-suma');
+
     resultado.forEach(fila => {
-        const row = fila.map(val => `<span>${val.toFixed(2)}</span>`).join(' ');
-        contenedor.innerHTML += `<div>${row}</div>`;
+        const filaDiv = document.createElement('div');
+        filaDiv.style.display = 'flex';
+
+        fila.forEach(val => {
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.value = val.toFixed(2);
+            input.className = 'input-dinamico resultado-matriz';
+            input.disabled = true;
+            filaDiv.appendChild(input);
+        });
+
+        contenedor.appendChild(filaDiv);
     });
+}
+
+function crearMatricesSuma() {
+    const dimension = parseInt(document.getElementById('dimension-suma').value);
+    const filas = dimension;
+    const columnas = dimension;
+    const contenedor = document.getElementById('matrices-suma');
+
+    if (!dimension || dimension <= 1) {
+        alert("Por favor, ingrese una dimensión válida mayor a 1.");
+        return;
+    }
+
+    contenedor.innerHTML = ''; // Limpiar contenido previo
+
+    // Crear contenedores para las matrices y sus elementos visuales
+    const contenedorPrincipal = document.createElement('div');
+    contenedorPrincipal.style.display = 'flex';
+    contenedorPrincipal.style.flexDirection = 'column';
+    contenedorPrincipal.style.alignItems = 'center';
+
+    const filaMatrices = document.createElement('div');
+    filaMatrices.style.display = 'flex';
+    filaMatrices.style.alignItems = 'center';
+    filaMatrices.style.marginTop = '10px';
+
+    // Matriz 1 con paréntesis
+    const parenIzq1 = document.createElement('span');
+    parenIzq1.textContent = '(';
+    parenIzq1.style.fontSize = '24px';
+
+    const matriz1 = crearMatriz('matriz1-suma', filas, columnas);
+    const parenDer1 = document.createElement('span');
+    parenDer1.textContent = ')';
+    parenDer1.style.fontSize = '24px';
+
+    // Operador de suma
+    const operadorSuma = document.createElement('span');
+    operadorSuma.textContent = '+';
+    operadorSuma.style.fontSize = '24px';
+    operadorSuma.style.margin = '0 10px';
+
+    // Matriz 2 con paréntesis
+    const parenIzq2 = document.createElement('span');
+    parenIzq2.textContent = '(';
+    parenIzq2.style.fontSize = '24px';
+
+    const matriz2 = crearMatriz('matriz2-suma', filas, columnas);
+
+
+    const parenDer2 = document.createElement('span');
+    parenDer2.textContent = ')';
+    parenDer2.style.fontSize = '24px';
+
+    // Operador de igualdad (se mostrará después)
+    const operadorIgual = document.createElement('span');
+    operadorIgual.textContent = '=';
+    operadorIgual.style.fontSize = '24px';
+    operadorIgual.style.margin = '0 10px';
+    operadorIgual.style.display = 'none'; // Ocultar inicialmente
+
+    // Matriz resultado con paréntesis (se mostrará después)
+    const parenIzqRes = document.createElement('span');
+    parenIzqRes.textContent = '(';
+    parenIzqRes.style.fontSize = '24px';
+    parenIzqRes.style.display = 'none';
+
+    const matrizResultado = crearMatriz('resultado-suma', filas, columnas, true);
+    matrizResultado.style.display = 'none';
+
+    const parenDerRes = document.createElement('span');
+    parenDerRes.textContent = ')';
+    parenDerRes.style.fontSize = '24px';
+    parenDerRes.style.display = 'none';
+
+    // Botón para sumar matrices
+    const botonSumar = document.getElementById('sumar')
+    botonSumar.onclick = function () {
+        sumarMatrices(dimension, matrizResultado, operadorIgual, parenIzqRes, parenDerRes);
+    };
+
+    // Agregar elementos al contenedor de la fila
+    filaMatrices.appendChild(parenIzq1);
+    filaMatrices.appendChild(matriz1);
+    filaMatrices.appendChild(parenDer1);
+    filaMatrices.appendChild(operadorSuma);
+    filaMatrices.appendChild(parenIzq2);
+    filaMatrices.appendChild(matriz2);
+    filaMatrices.appendChild(parenDer2);
+    filaMatrices.appendChild(operadorIgual);
+    filaMatrices.appendChild(parenIzqRes);
+    filaMatrices.appendChild(matrizResultado);
+    filaMatrices.appendChild(parenDerRes);
+
+    // Agregar fila de matrices y botón al contenedor principal
+    contenedorPrincipal.appendChild(filaMatrices);
+    contenedorPrincipal.appendChild(botonSumar);
+
+    // Agregar contenedor principal al contenedor de la funcionalidad
+    contenedor.appendChild(contenedorPrincipal);
+}
+
+function crearMatriz(id, filas, columnas, disabled = false) {
+    const matriz = document.createElement('div');
+    matriz.id = id;
+    matriz.style.display = 'flex';
+    matriz.style.flexDirection = 'column';
+
+    for (let i = 0; i < filas; i++) {
+        const fila = document.createElement('div');
+        fila.style.display = 'flex';
+
+        for (let j = 0; j < columnas; j++) {
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.value = 0;
+            input.className = 'input-dinamico';
+            input.disabled = disabled;
+            fila.appendChild(input);
+        }
+        matriz.appendChild(fila);
+    }
+    return matriz;
+}
+
+function ajustarTamañoInput(input) {
+    input.style.width = Math.max(input.value.length * 10 + 10, 50) + 'px';
 }

@@ -1,10 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Bokor&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap');
+
+
 body {
     height: 100%;
     margin: 0;
 }
 
 .header {
+    display: flex;
     margin-top: 1%;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background: #AA5486;
+    color: white;
+    padding: 1rem;
 }
 
 .contenedor-principal {
@@ -18,7 +30,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 1%;
+    margin-top: 2%;
     overflow-y: auto; /* Permite desplazamiento si el contenido es muy alto */
 }
 
@@ -29,45 +41,50 @@ body {
     padding: 10px;
     cursor: pointer;
     margin: 5px;
+    font-family: 'Bokor', system-ui;
+    box-shadow: 1px 1px 3px black;
+    background: none;
 }
 
 .boton1:hover {
     transition: 0.5s;
     background-color: navy;
     color: white;
+    font-size: 15px;
 }
 
 .boton2:hover {
     transition: 0.5s;
     background-color: crimson;
     color: white;
+    font-size: 15px;
 }
 
 .boton3:hover {
     transition: 0.5s;
     background-color: darkgreen;
     color: white;
+    font-size: 15px;
 }
 
 .footer {
     width: 100%;
     height: 50px;
-    background-color: black;
     text-align: center;
     position: fixed; /* Permanece en la parte inferior de la ventana */
     bottom: 0;
 }
 
 .parrafo-final {
-    background-color: black;
+    background-color: #1C325B;
     color: white;
     padding: 0.7rem;
+    font-family: "Lara", serif;
 }
 
 /* Oculta todos los divs de funcionalidad inicialmente */
 .funcionalidad > div {
     display: none;
-    background-color: lightgray;
     padding: 20px;
     border-radius: 10px;
     text-align: center;
@@ -113,4 +130,175 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.navegador {
+    display: flex;
+    justify-content: space-around;
+}
+
+h1 {
+    font-family: 'Bokor', system-ui;
+}
+
+.sistema-ecuaciones > h3 {
+    font-family: 'Bokor', system-ui;
+}
+
+.sistema-ecuaciones {
+    background: none;
+    flex-direction: column;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.sistema-ecuaciones > label {
+    font-family: 'Bokor', system-ui;
+}
+
+.sistema-ecuaciones > input {
+    text-decoration: none;
+    text-align: center;
+    border: none;
+}
+
+.matricesMult > input[type="number"] {
+    text-decoration: none;
+    font-family: "Josefin Sans", sans-serif;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid black;
+    padding: 5px 10px;
+    outline: none;
+}
+
+.matricesSuma > input[type="number"] {
+    text-decoration: none;
+    font-family: "Josefin Sans", sans-serif;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid black;
+    padding: 5px 10px;
+    outline: none;
+}
+
+.generar {
+    margin-top: 10px;
+    background: #FA812F;
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+    border-color: white;
+    box-shadow: none;
+    font-family: 'Bokor', system-ui;
+}
+
+.resolver {
+    background: #3C552D;
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+    border-color: white;
+    box-shadow: none;
+    font-family: 'Bokor', system-ui;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    font-family: "Josefin Sans", sans-serif;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid black;
+    padding: 5px 10px;
+    outline: none;
+}
+
+.matricesMult {
+    display: flex;
+    flex-direction: column;
+}
+
+.matricesSuma {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between; /* Ajusta el espacio entre los elementos */
+    gap: 20px;
+}
+
+#resultado-suma {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.matricesSuma > div {
+    display: flex;
+    flex-direction: row;
+}
+
+.input-dinamico {
+    margin: 5px;
+    width: 50px;
+}
+
+.sistema-coeficientes > input {
+    width: 50px;
+    margin: 5px;
+}
+
+.sistema-coeficientes > input[type="text"] {
+    text-align: center;
+    font-family: "Josefin Sans", sans-serif;
+}
+
+.matrices-suma {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.matrices-suma > div {
+    display: flex;
+    justify-content: center;
+}
+
+.resultado-matriz {
+    margin: 2px;
+    width: 50px;
+    text-align: center;
+}
+
+.matricesMult > h3, .matricesSuma>h3 {
+    font-family: 'Bokor', system-ui;
+}
+
+.dimension {
+    font-family: 'Josefin Sans', sans-serif;
+}
+
+.boton-generar {
+    margin-top: 10px;
+    background: #FA812F;
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+    border-color: white;
+    box-shadow: none;
+    font-family: 'Bokor', system-ui;
+}
+
+.boton-multiplicar {
+    background: #3C552D;
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+    border-color: white;
+    box-shadow: none;
+    font-family: 'Bokor', system-ui;
 }
