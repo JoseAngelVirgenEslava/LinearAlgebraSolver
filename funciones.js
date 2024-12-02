@@ -350,30 +350,64 @@ function multiplicarMatrices(filas1, columnas1, columnas2, matrizResultado, oper
     const matriz2Inputs = document.querySelectorAll('#matriz2 input');
     const resultadoInputs = matrizResultado.querySelectorAll('input');
 
-    const matriz1 = [...matriz1Inputs].map(input => parseFloat(input.value) || 0);
-    const matriz2 = [...matriz2Inputs].map(input => parseFloat(input.value) || 0);
+    // Matrices para guardar los valores
+    const matriz1 = [];
+    const matriz2 = [];
+    const resultados = [];
 
-    // Multiplicar las matrices
-    let resultados = []; // Almacenar los valores calculados
+    // Obtener valores de matriz 1
     for (let i = 0; i < filas1; i++) {
+        const fila = [];
+        for (let j = 0; j < columnas1; j++) {
+            const valor = parseFloat(matriz1Inputs[i * columnas1 + j].value) || 0;
+            fila.push(valor);
+        }
+        matriz1.push(fila);
+    }
+
+    // Obtener valores de matriz 2
+    for (let i = 0; i < columnas1; i++) { // columnas1 = filas de matriz 2
+        const fila = [];
+        for (let j = 0; j < columnas2; j++) {
+            const valor = parseFloat(matriz2Inputs[i * columnas2 + j].value) || 0;
+            fila.push(valor);
+        }
+        matriz2.push(fila);
+    }
+
+    // Calcular la multiplicación
+    for (let i = 0; i < filas1; i++) {
+        const filaResultado = [];
         for (let j = 0; j < columnas2; j++) {
             let suma = 0;
             for (let k = 0; k < columnas1; k++) {
-                const valor1 = matriz1[i * columnas1 + k];
-                const valor2 = matriz2[k * columnas2 + j];
-                suma += valor1 * valor2;
+                suma += matriz1[i][k] * matriz2[k][j];
             }
-            resultadoInputs[i * columnas2 + j].value = suma;
-            resultados.push(suma); // Agregar a los resultados
+            filaResultado.push(suma);
         }
+        resultados.push(filaResultado);
     }
 
     // Guardar en localStorage
     const operaciones = JSON.parse(localStorage.getItem("multiplicacionMatrices")) || [];
-    operaciones.push({ filas1, columnas1, columnas2, matriz1, matriz2, resultados });
+    operaciones.push({
+        filas1,
+        columnas1,
+        filas2: columnas1,
+        columnas2,
+        matriz1,
+        matriz2,
+        resultados
+    });
     localStorage.setItem("multiplicacionMatrices", JSON.stringify(operaciones));
 
-    // Mostrar el resultado
+    // Mostrar resultado en la interfaz
+    for (let i = 0; i < filas1; i++) {
+        for (let j = 0; j < columnas2; j++) {
+            resultadoInputs[i * columnas2 + j].value = resultados[i][j];
+        }
+    }
+
     operadorIgual.style.display = 'block';
     matrizResultado.style.display = 'flex';
     parenIzqRes.style.display = 'block';
@@ -381,7 +415,7 @@ function multiplicarMatrices(filas1, columnas1, columnas2, matrizResultado, oper
 }
 
 function cargarDatosGuardados() {
-    // Sistema de ecuaciones
+    // Resolver sistemas de ecuaciones
     const sistemas = JSON.parse(localStorage.getItem("sistemaEcuaciones")) || [];
     if (sistemas.length > 0) {
         const ultimoSistema = sistemas[sistemas.length - 1];
@@ -393,10 +427,7 @@ function cargarDatosGuardados() {
         resultadoEcuaciones.innerHTML = "";
 
         // Reconstruir la matriz aumentada
-        const parenIzquierdo = document.createElement("div");
-        parenIzquierdo.textContent = "(";
-        parenIzquierdo.classList.add("sistema-parentesis");
-
+        const parenIzquierdo = crearParentesis("(");
         const coeficientes = document.createElement("div");
         coeficientes.classList.add("sistema-coeficientes");
         for (let i = 0; i < ultimoSistema.dimension; i++) {
@@ -405,15 +436,12 @@ function cargarDatosGuardados() {
                 input.type = "number";
                 input.value = ultimoSistema.matrizAumentada[i][j];
                 input.classList.add("input-coeficiente");
-                input.disabled = true; // Solo lectura
+                input.disabled = true;
                 coeficientes.appendChild(input);
             }
             coeficientes.appendChild(document.createElement("br"));
         }
-
-        const parenDerecho = document.createElement("div");
-        parenDerecho.textContent = ")";
-        parenDerecho.classList.add("sistema-parentesis");
+        const parenDerecho = crearParentesis(")");
 
         // Vector de variables (x1, x2, ..., xn)
         const vectorVariables = document.createElement("div");
@@ -435,7 +463,7 @@ function cargarDatosGuardados() {
             input.type = "number";
             input.value = ultimoSistema.matrizAumentada[i][ultimoSistema.dimension];
             input.classList.add("input-solucion");
-            input.disabled = true; // Solo lectura
+            input.disabled = true;
             vectorSolucion.appendChild(input);
             vectorSolucion.appendChild(document.createElement("br"));
         }
@@ -444,7 +472,7 @@ function cargarDatosGuardados() {
         igual.textContent = "=";
         igual.style.margin = "0 10px";
 
-        // Agregar al contenedor de ecuaciones
+        // Agregar al contenedor
         matrizEcuaciones.appendChild(parenIzquierdo);
         matrizEcuaciones.appendChild(coeficientes);
         matrizEcuaciones.appendChild(parenDerecho);
@@ -455,17 +483,12 @@ function cargarDatosGuardados() {
         // Mostrar resultado
         const contenedorResultado = document.createElement("div");
         contenedorResultado.classList.add("sistema-contenedor");
-
-        const llaveIzquierda = document.createElement("div");
-        llaveIzquierda.textContent = "{";
-        llaveIzquierda.classList.add("sistema-parentesis");
-
+        const llaveIzquierda = crearParentesis("{");
         const listaResultados = document.createElement("div");
         listaResultados.innerHTML = ultimoSistema.soluciones
             .map((valor, index) => `x${index + 1} = ${valor.toFixed(2)}`)
             .join("<br>");
         listaResultados.classList.add("resultado-sistema");
-
         contenedorResultado.appendChild(llaveIzquierda);
         contenedorResultado.appendChild(listaResultados);
         resultadoEcuaciones.appendChild(contenedorResultado);
@@ -484,7 +507,7 @@ function cargarDatosGuardados() {
 
         // Matriz 1 con paréntesis
         filaMatrices.appendChild(crearParentesis("("));
-        reconstruirMatriz(ultimaMultiplicacion.matriz1, ultimaMultiplicacion.filas1, ultimaMultiplicacion.columnas1, filaMatrices, true);
+        reconstruirMatriz(ultimaMultiplicacion.matriz1, ultimaMultiplicacion.filas1, ultimaMultiplicacion.columnas1, filaMatrices);
         filaMatrices.appendChild(crearParentesis(")"));
 
         // Operador de multiplicación
@@ -496,7 +519,7 @@ function cargarDatosGuardados() {
 
         // Matriz 2 con paréntesis
         filaMatrices.appendChild(crearParentesis("("));
-        reconstruirMatriz(ultimaMultiplicacion.matriz2, ultimaMultiplicacion.filas2, ultimaMultiplicacion.columnas2, filaMatrices, true); // Asegura la referencia a matriz2
+        reconstruirMatriz(ultimaMultiplicacion.matriz2, ultimaMultiplicacion.filas2, ultimaMultiplicacion.columnas2, filaMatrices);
         filaMatrices.appendChild(crearParentesis(")"));
 
         // Operador de igualdad
@@ -512,6 +535,49 @@ function cargarDatosGuardados() {
         filaMatrices.appendChild(crearParentesis(")"));
 
         contenedorMultiplicacion.appendChild(filaMatrices);
+    }
+
+    // Suma de matrices
+    const sumas = JSON.parse(localStorage.getItem("sumaMatrices")) || [];
+    if (sumas.length > 0) {
+        const ultimaSuma = sumas[sumas.length - 1];
+        const contenedorSuma = document.getElementById("matrices-suma");
+        contenedorSuma.innerHTML = ""; // Limpiar contenido anterior
+
+        const filaMatrices = document.createElement("div");
+        filaMatrices.style.display = "flex";
+        filaMatrices.style.alignItems = "center";
+
+        // Matriz 1 con paréntesis
+        filaMatrices.appendChild(crearParentesis("("));
+        reconstruirMatriz(ultimaSuma.matriz1, ultimaSuma.dimension, ultimaSuma.dimension, filaMatrices);
+        filaMatrices.appendChild(crearParentesis(")"));
+
+        // Operador de suma
+        const operadorSuma = document.createElement("span");
+        operadorSuma.textContent = "+";
+        operadorSuma.style.fontSize = "24px";
+        operadorSuma.style.margin = "0 10px";
+        filaMatrices.appendChild(operadorSuma);
+
+        // Matriz 2 con paréntesis
+        filaMatrices.appendChild(crearParentesis("("));
+        reconstruirMatriz(ultimaSuma.matriz2, ultimaSuma.dimension, ultimaSuma.dimension, filaMatrices);
+        filaMatrices.appendChild(crearParentesis(")"));
+
+        // Operador de igualdad
+        const operadorIgual = document.createElement("span");
+        operadorIgual.textContent = "=";
+        operadorIgual.style.fontSize = "24px";
+        operadorIgual.style.margin = "0 10px";
+        filaMatrices.appendChild(operadorIgual);
+
+        // Matriz resultado con paréntesis
+        filaMatrices.appendChild(crearParentesis("("));
+        reconstruirMatriz(ultimaSuma.resultados, ultimaSuma.dimension, ultimaSuma.dimension, filaMatrices, true);
+        filaMatrices.appendChild(crearParentesis(")"));
+
+        contenedorSuma.appendChild(filaMatrices);
     }
 }
 
@@ -536,7 +602,7 @@ function reconstruirMatriz(matriz, filas, columnas, contenedor, readonly = false
         for (let j = 0; j < columnas; j++) {
             const input = document.createElement("input");
             input.type = "number";
-            input.value = matriz[i * columnas + j];
+            input.value = matriz[i][j] || 0; // Asigna el valor correspondiente o 0 si está vacío
             input.classList.add("input-dinamico");
             if (readonly) input.disabled = true; // Solo lectura si es resultado
             filaDiv.appendChild(input);
@@ -581,14 +647,40 @@ function sumarMatrices(dimension, matrizResultado, operadorIgual, parenIzqRes, p
     const matriz2Inputs = document.querySelectorAll('#matriz2-suma input');
     const resultadoInputs = matrizResultado.querySelectorAll('#resultado-suma input');
 
-    const matriz1 = [...matriz1Inputs].map(input => parseFloat(input.value) || 0);
-    const matriz2 = [...matriz2Inputs].map(input => parseFloat(input.value) || 0);
+    // Inicializar matrices
+    const matriz1 = [];
+    const matriz2 = [];
     const resultados = [];
 
-    for (let i = 0; i < dimension * dimension; i++) {
-        const suma = parseFloat(matriz1Inputs[i].value) + parseFloat(matriz2Inputs[i].value);
-        resultadoInputs[i].value = suma;
-        resultados.push(suma);
+    // Obtener valores de matriz 1
+    for (let i = 0; i < dimension; i++) {
+        const fila1 = [];
+        for (let j = 0; j < dimension; j++) {
+            const valor = parseFloat(matriz1Inputs[i * dimension + j].value) || 0;
+            fila1.push(valor);
+        }
+        matriz1.push(fila1);
+    }
+
+    // Obtener valores de matriz 2
+    for (let i = 0; i < dimension; i++) {
+        const fila2 = [];
+        for (let j = 0; j < dimension; j++) {
+            const valor = parseFloat(matriz2Inputs[i * dimension + j].value) || 0;
+            fila2.push(valor);
+        }
+        matriz2.push(fila2);
+    }
+
+    // Sumar matrices
+    for (let i = 0; i < dimension; i++) {
+        const filaResultado = [];
+        for (let j = 0; j < dimension; j++) {
+            const suma = matriz1[i][j] + matriz2[i][j];
+            filaResultado.push(suma);
+            resultadoInputs[i * dimension + j].value = suma;
+        }
+        resultados.push(filaResultado);
     }
 
     // Guardar en localStorage
@@ -596,7 +688,7 @@ function sumarMatrices(dimension, matrizResultado, operadorIgual, parenIzqRes, p
     operaciones.push({ dimension, matriz1, matriz2, resultados });
     localStorage.setItem("sumaMatrices", JSON.stringify(operaciones));
 
-    // Mostrar el resultado
+    // Mostrar resultado
     operadorIgual.style.display = 'block';
     matrizResultado.style.display = 'flex';
     parenIzqRes.style.display = 'block';
